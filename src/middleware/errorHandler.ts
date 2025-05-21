@@ -1,51 +1,48 @@
 import { Request, Response, NextFunction } from 'express';
 import ApiError from '../utils/ApiError';
 
-export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error:', err);
-
+const errorHandler = (
+  err: Error | ApiError,
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   if (err instanceof ApiError) {
-    return res.status(err.statusCode).json({
+    res.status(err.statusCode).json({
       success: false,
-      message: err.message
+      message: err.message,
+      path: (err as any).path || req.path
     });
+    return;
   }
 
   // Handle mongoose validation errors
   if (err.name === 'ValidationError') {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
-      message: 'Validation Error',
-      errors: Object.values(err as any).map((error: any) => error.message)
+      message: Object.values((err as any)?.errors || {}).map((error: any) => error.message),
+      path: req.path
     });
+    return;
   }
 
   // Handle mongoose duplicate key errors
-  if (err.name === 'MongoServerError' && (err as any).code === 11000) {
-    return res.status(400).json({
+  if (err.name === 'MongoError' && (err as any).code === 11000) {
+    res.status(400).json({
       success: false,
-      message: 'Duplicate field value entered'
+      message: 'Duplicate field value entered',
+      path: req.path
     });
+    return;
   }
 
-  // Handle JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid token'
-    });
-  }
+  console.error('Error:', err);
 
-  if (err.name === 'TokenExpiredError') {
-    return res.status(401).json({
-      success: false,
-      message: 'Token expired'
-    });
-  }
-
-  // Default error
   res.status(500).json({
     success: false,
-    message: 'Something went wrong!'
+    message: 'Internal server error',
+    path: req.path
   });
-}; 
+};
+
+export default errorHandler; 
