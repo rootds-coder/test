@@ -19,7 +19,7 @@ mongoose.connect(config.mongoUri, {
 
 // Middleware
 app.use(cors({
-  origin: ['https://crowd-fund-zeta.vercel.app', 'http://localhost:3000'],
+  origin: ['https://fund-taupe.vercel.app', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
