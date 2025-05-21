@@ -19,7 +19,9 @@ mongoose.connect(config.mongoUri, {
 
 // Middleware
 app.use(cors({
-  origin: config.corsOrigin,
+  origin: ['https://crowd-fund-zeta.vercel.app', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 app.use(express.json());
